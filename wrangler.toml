@@ -112,3 +112,7 @@ enabled = true
 # [[vectorize]]
 # binding = "MY_INDEX"
 # index_name = "my-index"
+
+routes = [
+  { pattern = "parallelmazes.eltrick.uk", custom_domain = true }
+]
