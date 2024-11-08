@@ -1,55 +1,36 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run "npm run dev" in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run "npm run deploy" to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
-
 import { SocketClient } from "./socket-client";
 
+const clients: { [id: string]: SocketClient } = {};
+
 declare global {
-  interface WebSocket {
-    accept(): void;
-  }
-
-  class WebSocketPair {
-    0: WebSocket;
-    1: WebSocket;
-  }
-
   interface ResponseInit {
-    webSocket?: WebSocket;
+    webSocket?: WebSocket | null;
   }
 }
 
-const clients = {};
-
 export default {
-  async fetch(request, env, ctx) {
-    return handleRequest(request);
-  },
-};
+    async fetch(request: any, env: any, ctx: any) {
+        return handleRequest(request);
+    }
+}
 
-async function handleRequest(request) {
-  const upgradeHeader = request.headers.get('Upgrade');
-  if (!upgradeHeader || upgradeHeader !== 'websocket') {
-    return new Response('Expected Upgrade: websocket', { status: 426 });
-  }
+async function handleRequest(request: any) {
+    const upgradeHeader = request.headers.get('Upgrade');
+    if (!upgradeHeader || upgradeHeader !== 'websocket') {
+        return new Response('Expected Upgrade: websocket', { status: 426 });
+    }
 
-  const webSocketPair = new WebSocketPair();
-  const [client, server] = Object.values(webSocketPair);
+    const wsp = new WebSocketPair();
+    const [cli, srv] = Object.values(wsp);
 
-  server.addEventListener("open", (ws) => {
-    const _client = new SocketClient(client);
-    clients[_client.id] = _client;
-    _client.onDisconnect(() => delete clients[_client.id]);
-  })
+    srv.accept();
 
-  return new Response(null, {
-    status: 101,
-    webSocket: client,
-  });
+    const client = new SocketClient(srv);
+    clients[client.id] = client;
+    client.onDisconnect(() => delete clients[client.id]);
+
+    return new Response(null, {
+        status: 101,
+        webSocket: cli
+    });
 }

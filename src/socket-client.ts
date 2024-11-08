@@ -1,4 +1,4 @@
-import WebSocket from "ws";
+import { Buffer } from "node:buffer"
 
 import { ClientError } from "./client-error";
 import { ID_SYMBOLS } from "./constants";
@@ -14,13 +14,14 @@ export class SocketClient {
   constructor(private readonly ws: WebSocket) {
     this.id = randomString(ID_SYMBOLS, 16);
     this.log("connected");
-    this.ws.on("close", () => {
+    ws.addEventListener("close", () => {
       this.log("disconnected");
       for (const handler of this.disconnectHandlers) handler();
     });
-    this.ws.on("message", (data) => {
-      if (Array.isArray(data)) data = [].concat(data);
-      const raw = data.toString();
+    ws.addEventListener("message", (data) => {
+      let message_data = data.data;
+      if (Array.isArray(message_data)) message_data = Buffer.concat(message_data);
+      const raw = message_data.toString();
       let json: Json;
       try {
         json = JSON.parse(raw);
@@ -29,6 +30,7 @@ export class SocketClient {
       }
       if (typeof json !== "object" || !json || Array.isArray(json)) return;
       const { id, method, args } = json;
+      console.log(raw)
       if (typeof id !== "number") return;
       try {
         if (typeof method !== "string") throw new ClientError("method is not a string");
