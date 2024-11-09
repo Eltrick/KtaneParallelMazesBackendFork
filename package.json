@@ -1,0 +1,20 @@
+{
+  "name": "parallelmazes",
+  "version": "0.2.1",
+  "description": "Backend for Parallel Mazes",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Eltrick",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/ws": "^8.5.13",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "node": "^22.11.0",
+    "ws": "^8.18.0"
+  }
+}
